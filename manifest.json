@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "Minimalist Digital Clock New Tab",
+  "version": "1.0",
+  "description": "A premium, minimalist new tab extension featuring a beautiful digital clock and a deep black aesthetic.",
+  "chrome_url_overrides": {
+    "newtab": "index.html"
+  },
+  "permissions": [],
+  "icons": {
+    "128": "icon.png"
+  }
+}

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Tab</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="top-right-widget" aria-live="polite">
+        <div class="greeting" id="greeting-text">Hi Emil</div>
+        <div class="temperature" id="temperature-text">--°C</div>
+    </div>
+
+    <div class="container">
+        <div id="clock" class="clock">
+            <div id="date" class="date"></div>
+            <span id="clock-text">00:00</span>
+        </div>
+    </div>
+    
+    <div class="ai-dock">
+        <div class="dock-inner">
+            <a href="https://chatgpt.com" target="_blank" class="dock-item" title="ChatGPT">
+                <span class="dock-icon icon-chatgpt" aria-hidden="true"></span>
+            </a>
+            <a href="https://claude.ai" target="_blank" class="dock-item" title="Claude">
+                <span class="dock-icon icon-claude" aria-hidden="true"></span>
+            </a>
+            <a href="https://gemini.google.com" target="_blank" class="dock-item" title="Gemini">
+                <span class="dock-icon icon-gemini" aria-hidden="true"></span>
+            </a>
+            <a href="https://www.perplexity.ai" target="_blank" class="dock-item" title="Perplexity">
+                <span class="dock-icon icon-perplexity" aria-hidden="true"></span>
+            </a>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
