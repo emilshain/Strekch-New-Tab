@@ -12,6 +12,15 @@
     --glass-bg: rgba(255, 255, 255, 0.03);
     --glass-border: rgba(255, 255, 255, 0.08);
     --font-family: 'SF Pro Variable', system-ui, -apple-system, sans-serif;
+    
+    /* Responsive Scaling Base */
+    --responsive-unit: calc(0.5vw + 0.5vh);
+    
+    /* Design System Rules: radius = padding = 2 * gap = 2 * margin */
+    --gap: calc(var(--responsive-unit) * 1.5);
+    --margin: var(--gap);
+    --padding: calc(2 * var(--gap));
+    --radius: var(--padding);
 }
 
 * {
@@ -31,22 +40,20 @@ body {
     overflow: hidden;
     user-select: none;
     position: relative;
-    padding: 2.75vh;
+    padding: var(--margin);
 }
-
-
 
 .greeting-card {
     grid-area: greeting;
     background: #ffffff;
-    padding: 5.5vh;
-    border-radius: 5.5vh;
+    padding: var(--padding);
+    border-radius: var(--radius);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2), inset 0 0 0 1px rgba(255, 61, 0, 0.5);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 16px;
+    gap: calc(var(--responsive-unit) * 1.6);
     text-align: center;
     aspect-ratio: 1 / 1;
     height: 100%;
@@ -76,8 +83,8 @@ body {
 
 @media (max-width: 700px) {
     .top-right-widget {
-        top: 18px;
-        right: 18px;
+        top: calc(var(--responsive-unit) * 1.8);
+        right: calc(var(--responsive-unit) * 1.8);
     }
 }
 
@@ -94,7 +101,7 @@ body {
         "clock greeting";
     justify-content: center;
     align-items: center;
-    gap: 2.75vh;
+    gap: var(--gap);
     animation: fadeIn 1.5s ease-out forwards;
 }
 
@@ -102,12 +109,11 @@ body {
 .greeting-card { grid-area: greeting; }
 .clock-card { grid-area: clock; }
 
-
 .date-card {
     grid-area: date;
     background: #ff3d00;
-    padding: 5.5vh;
-    border-radius: 5.5vh;
+    padding: var(--padding);
+    border-radius: var(--radius);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2), inset 0 0 0 1px rgba(255, 61, 0, 0.5);
     display: flex;
     flex-direction: column;
@@ -151,8 +157,8 @@ body {
     width: 100%;
     height: 100%;
     background-image: radial-gradient(ellipse 120% 100% at 50% 100%, #ff9d00 0%, #ff6f00 4%, #ff3d00 25%, #8b0000 50%, #000000 100%);
-    padding: 6.5vh;
-    border-radius: 6.5vh;
+    padding: var(--padding);
+    border-radius: var(--radius);
     box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 61, 0, 0.4);
     overflow: hidden;
     display: flex;
@@ -236,15 +242,15 @@ body {
     transform: translate(-50%, -50%);
     background: rgba(0, 0, 0, 0.85);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    padding: 32px;
+    border-radius: calc(var(--responsive-unit) * 2);
+    padding: calc(var(--responsive-unit) * 3);
     z-index: 1000;
     color: white;
     font-family: var(--font-family);
     display: none; /* Controlled by JS */
     flex-direction: column;
     align-items: center;
-    gap: 24px;
+    gap: calc(var(--responsive-unit) * 2.5);
     box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
 }
 
@@ -254,7 +260,7 @@ body {
 }
 
 .legend-title {
-    font-size: 24px;
+    font-size: calc(var(--responsive-unit) * 2.4);
     font-weight: 600;
     letter-spacing: -0.01em;
     opacity: 0.9;
@@ -263,24 +269,24 @@ body {
 .legend-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 16px 40px;
+    gap: calc(var(--responsive-unit) * 1.5) calc(var(--responsive-unit) * 4);
 }
 
 .legend-item {
-    font-size: 16px;
+    font-size: calc(var(--responsive-unit) * 1.6);
     color: rgba(255, 255, 255, 0.8);
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: calc(var(--responsive-unit) * 1.2);
 }
 
 .key {
     background: rgba(255, 255, 255, 0.15);
-    padding: 4px 8px;
-    border-radius: 6px;
+    padding: calc(var(--responsive-unit) * 0.4) calc(var(--responsive-unit) * 0.8);
+    border-radius: calc(var(--responsive-unit) * 0.6);
     font-family: monospace;
-    font-size: 14px;
+    font-size: calc(var(--responsive-unit) * 1.4);
     color: white;
-    min-width: 50px;
+    min-width: calc(var(--responsive-unit) * 5);
     text-align: center;
 }
