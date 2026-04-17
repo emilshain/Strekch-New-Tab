@@ -1,24 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>New Tab</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <div class="top-right-widget" aria-live="polite">
-        <div class="greeting" id="greeting-text">Hi Emil</div>
-        <div class="temperature" id="temperature-text">--°C</div>
-    </div>
 
+<body>
     <div class="container">
-        <div id="clock" class="clock">
-            <div id="date" class="date"></div>
-            <span id="clock-text">00:00</span>
+        <div class="date-card" id="date-card">
+            <div class="day-section" id="day-section">
+                <span id="day-text"></span>
+            </div>
+            <div class="date-section" id="date-section">
+                <span id="date-text-new"></span>
+            </div>
+        </div>
+        <div class="greeting-card" id="greeting-card">
+            <div class="temperature-section" id="temp-section">
+                <div class="temperature" id="temperature-text">--°C</div>
+            </div>
+        </div>
+        <div class="clock-card" id="clock-card">
+            <div class="clock-section" id="clock-section">
+                <div id="clock" class="clock">
+                    <span id="clock-text">00:00</span>
+                </div>
+            </div>
         </div>
     </div>
-    
+
 
 
     <div id="shortcuts-legend" class="shortcuts-legend" aria-hidden="true">
@@ -38,4 +51,5 @@
 
     <script src="script.js"></script>
 </body>
+
 </html>

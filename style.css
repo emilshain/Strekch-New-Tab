@@ -22,7 +22,6 @@
 
 body {
     background-color: #000000;
-    background-image: radial-gradient(ellipse 120% 100% at 50% 100%, #ff9d00 0%, #ff6f00 4%, #ff3d00 25%, #8b0000 50%, #000000 100%);
     color: var(--text-color);
     font-family: var(--font-family);
     height: 100vh;
@@ -32,43 +31,47 @@ body {
     overflow: hidden;
     user-select: none;
     position: relative;
+    padding: 2.75vh;
 }
 
-body::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
+
+
+.greeting-card {
+    grid-area: greeting;
+    background: #ffffff;
+    padding: 5.5vh;
+    border-radius: 5.5vh;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2), inset 0 0 0 1px rgba(255, 61, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+    aspect-ratio: 1 / 1;
     height: 100%;
-    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-    opacity: 0.1;
-    pointer-events: none;
-    z-index: 1;
+    width: auto;
+    max-width: 100%;
+    overflow: hidden;
+    color: #000000;
 }
 
-.top-right-widget {
-    position: fixed;
-    top: 28px;
-    right: 32px;
-    z-index: 110;
-    text-align: right;
-    color: rgba(255, 255, 255, 0.92);
-    opacity: 0;
-    animation: fadeIn 1s ease-out 0.35s forwards;
+.temperature-section {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.greeting {
-    font-size: clamp(16px, 1.8vw, 24px);
-    font-weight: 520;
-    letter-spacing: 0.02em;
-}
-
-.temperature {
-    margin-top: 4px;
-    font-size: clamp(14px, 1.5vw, 20px);
-    font-weight: 420;
-    color: rgba(255, 255, 255, 0.78);
+#temperature-text {
+    font-weight: 200;
+    font-variation-settings: "wght" 200, "wdth" 100;
+    line-height: 0.94;
+    display: block;
+    margin: 0;
+    white-space: nowrap;
+    color: #ff3d00;
 }
 
 @media (max-width: 700px) {
@@ -81,7 +84,107 @@ body::before {
 .container {
     z-index: 2;
     opacity: 0;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    grid-template-areas: 
+        "clock date"
+        "clock greeting";
+    justify-content: center;
+    align-items: center;
+    gap: 2.75vh;
     animation: fadeIn 1.5s ease-out forwards;
+}
+
+.date-card { grid-area: date; }
+.greeting-card { grid-area: greeting; }
+.clock-card { grid-area: clock; }
+
+
+.date-card {
+    grid-area: date;
+    background: #ff3d00;
+    padding: 5.5vh;
+    border-radius: 5.5vh;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2), inset 0 0 0 1px rgba(255, 61, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    aspect-ratio: 1 / 1;
+    height: 100%;
+    width: auto;
+    max-width: 100%;
+    overflow: hidden;
+    color: #000000;
+}
+
+.day-section {
+    height: 30%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.date-section {
+    height: 70%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#day-text, #date-text-new {
+    font-weight: 200;
+    font-variation-settings: "wght" 200, "wdth" 100;
+    line-height: 0.94;
+    display: block;
+    margin: 0;
+    white-space: nowrap;
+}
+
+.clock-card {
+    grid-area: clock;
+    width: 100%;
+    height: 100%;
+    background-image: radial-gradient(ellipse 120% 100% at 50% 100%, #ff9d00 0%, #ff6f00 4%, #ff3d00 25%, #8b0000 50%, #000000 100%);
+    padding: 6.5vh;
+    border-radius: 6.5vh;
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 61, 0, 0.4);
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.clock-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.12;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.clock, .greeting, .temperature, .date {
+    z-index: 2;
+}
+
+.clock-section {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
 }
 
 .clock {
@@ -90,29 +193,25 @@ body::before {
     font-weight: 200;
     font-variation-settings: "wght" 200, "wdth" 100;
     letter-spacing: -0.02em;
-    line-height: 0.8;
-    /* Balanced to allow flush look without clipping */
+    line-height: 0.94;
     margin: 0;
     padding: 0;
     text-align: center;
     white-space: nowrap;
     display: flex;
-    flex-direction: column; /* Stack date and time */
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 0;
-    /* Auto-size to content */
-    min-width: 100vw;
-    min-height: 100vh;
+    width: 100%;
+    height: 100%;
 }
 
 .date {
-    font-size: 0.03em; /* Even smaller for a subtle, integrated look */
-    font-weight: 300;
-    font-variation-settings: "wght" 300, "wdth" 100;
-    letter-spacing: 0.3em;
-    color: rgba(255, 255, 255, 0.85);
-    margin-bottom: -0.15em; /* Tighten gap even more */
+    font-size: clamp(18px, 2.2vw, 28px);
+    font-weight: 200;
+    font-variation-settings: "wght" 200, "wdth" 100;
+    letter-spacing: -0.02em;
+    color: rgba(255, 255, 255, 0.9);
 }
 
 #clock-text {

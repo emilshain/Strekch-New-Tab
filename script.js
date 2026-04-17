@@ -4,16 +4,21 @@ function updateClock() {
     const minutes = String(now.getMinutes()).padStart(2, '0');
 
     const clockText = document.getElementById('clock-text');
-    const dateText = document.getElementById('date');
-    if (!clockText || !dateText) return;
+    const dayText = document.getElementById('day-text');
+    const dateTextNew = document.getElementById('date-text-new');
+    if (!clockText || !dayText || !dateTextNew) return;
 
     clockText.textContent = `${hours}:${minutes}`;
     
-    // Format: Wednesday, March 11
-    const options = { weekday: 'long', month: 'long', day: 'numeric' };
-    dateText.textContent = now.toLocaleDateString('en-US', options).toUpperCase();
+    // Day: WEDNESDAY
+    const dayOptions = { weekday: 'long' };
+    dayText.textContent = now.toLocaleDateString('en-US', dayOptions).toUpperCase();
 
-    fitClockToScreen();
+    // Date: MAR 11
+    const dateOptions = { month: 'short', day: 'numeric' };
+    dateTextNew.textContent = now.toLocaleDateString('en-US', dateOptions).toUpperCase();
+
+    fitAllCards();
 }
 
 let typedQueryBuffer = '';
@@ -125,33 +130,34 @@ function setupShortcuts() {
     });
 }
 
-function fitClockToScreen() {
-    const clock = document.getElementById('clock');
-    const clockText = document.getElementById('clock-text');
-    if (!clock || !clockText) return;
+function fitTextToContainer(textElement, containerElement, isClock = false) {
+    if (!textElement || !containerElement) return;
 
-    // 98% is the "sweet spot" to ensure visible flush edges without overflow
-    const margin = 0.98;
-    const targetW = window.innerWidth * margin;
-    const targetH = window.innerHeight * margin;
+    const baseWght = isClock ? 400 : 200;
+    
+    // Reset styles for measurement
+    textElement.style.fontSize = '100px'; 
+    textElement.style.fontVariationSettings = `'wdth' 100, 'wght' ${baseWght}`;
+
+    // Relying on CSS padding (8px) for margins, so we aim for 100% of inner dimensions
+    const targetW = containerElement.clientWidth;
+    const targetH = containerElement.clientHeight;
 
     let minWdth = 1;
-    let maxWdth = 200;
+    let maxWdth = 800; // Allow extreme stretching to touch the box edges
     
-    // 1. Initial Height Fit
-    clock.style.fontSize = '100px'; 
-    clock.style.fontVariationSettings = "'wdth' 100, 'wght' 400";
-    let rect = clockText.getBoundingClientRect();
-    let fontSize = 100 * (targetH / (rect.height || 100));
-    clock.style.fontSize = fontSize + 'px';
+    // 1. Initial Height Fit - 28% Overshoot
+    let rect = textElement.getBoundingClientRect();
+    let fontSize = 100 * (targetH / (rect.height || 100)) * 1.28;
+    textElement.style.fontSize = fontSize + 'px';
 
     // 2. Binary Search for ideal Width
     for (let i = 0; i < 15; i++) {
         let testWdth = (minWdth + maxWdth) / 2;
-        let testWght = Math.max(10, Math.min(950, testWdth * 5.5));
-        clock.style.fontVariationSettings = `'wdth' ${testWdth}, 'wght' ${testWght}`;
+        let testWght = isClock ? Math.max(10, Math.min(950, testWdth * 5.5)) : 200;
+        textElement.style.fontVariationSettings = `'wdth' ${testWdth}, 'wght' ${testWght}`;
         
-        rect = clockText.getBoundingClientRect();
+        rect = textElement.getBoundingClientRect();
         if (rect.width > targetW) {
             maxWdth = testWdth; 
         } else {
@@ -161,30 +167,40 @@ function fitClockToScreen() {
 
     // 3. Apply and Lock-in
     let finalWdth = minWdth;
-    let finalWght = Math.max(10, Math.min(950, finalWdth * 5.5));
-    clock.style.fontVariationSettings = `'wdth' ${finalWdth}, 'wght' ${finalWght}`;
+    let finalWght = isClock ? Math.max(10, Math.min(950, finalWdth * 5.5)) : 200;
+    textElement.style.fontVariationSettings = `'wdth' ${finalWdth}, 'wght' ${finalWght}`;
     
-    // Re-verify height after width changes (as width can affect vertical metrics slightly)
-    rect = clockText.getBoundingClientRect();
-    if (rect.height > targetH) {
-        fontSize *= (targetH / rect.height);
-        clock.style.fontSize = fontSize + 'px';
+    rect = textElement.getBoundingClientRect();
+    if (rect.height > targetH * 1.28) {
+        fontSize *= ((targetH * 1.28) / rect.height);
+        textElement.style.fontSize = fontSize + 'px';
     }
 
-    // 4. Absolute Safety Guard
-    // Shrink if any scrollbars appear or edges are breached
+    // 4. Absolute Safety Guard - Allow 28% vertical overflow for edge-to-edge ink
     for (let j = 0; j < 5; j++) {
-        rect = clockText.getBoundingClientRect();
-        const overflowV = rect.height > window.innerHeight || document.documentElement.scrollHeight > window.innerHeight;
-        const overflowH = rect.width > window.innerWidth || document.documentElement.scrollWidth > window.innerWidth;
+        rect = textElement.getBoundingClientRect();
+        const overflowV = rect.height > containerElement.clientHeight * 1.28;
+        const overflowH = rect.width > containerElement.clientWidth;
         
         if (overflowV || overflowH) {
             fontSize *= 0.98;
-            clock.style.fontSize = fontSize + 'px';
+            textElement.style.fontSize = fontSize + 'px';
         } else {
             break;
         }
     }
+}
+
+function fitAllCards() {
+    // Clock always fits to fill its (flexible) card
+    fitTextToContainer(document.getElementById('clock-text'), document.getElementById('clock-section'), true);
+    
+    // Fit Date Card sections
+    fitTextToContainer(document.getElementById('day-text'), document.getElementById('day-section'), false);
+    fitTextToContainer(document.getElementById('date-text-new'), document.getElementById('date-section'), false);
+    
+    // Fit Temperature Card - Now with weight-flexing enabled
+    fitTextToContainer(document.getElementById('temperature-text'), document.getElementById('temp-section'), true);
 }
 
 function getCurrentPositionAsync() {
@@ -224,8 +240,10 @@ async function updateTemperatureC() {
         }
 
         temperatureText.textContent = `${Math.round(tempC)}°C`;
+        fitAllCards();
     } catch {
         temperatureText.textContent = 'Location Off';
+        fitAllCards();
     }
 }
 
@@ -238,5 +256,5 @@ document.fonts.ready.then(() => {
 
     setInterval(updateClock, 1000);
     setInterval(updateTemperatureC, 10 * 60 * 1000);
-    window.addEventListener('resize', fitClockToScreen);
+    window.addEventListener('resize', fitAllCards);
 });
