@@ -21,115 +21,6 @@ function updateClock() {
     fitAllCards();
 }
 
-let typedQueryBuffer = '';
-let typedQueryResetTimer;
-
-function isEditableTarget(target) {
-    if (!target) return false;
-    const tagName = target.tagName;
-    return target.isContentEditable || tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT';
-}
-
-function updateAddressBarQuery(query) {
-    const url = new URL(window.location.href);
-    if (query) {
-        url.searchParams.set('q', query);
-    } else {
-        url.searchParams.delete('q');
-    }
-    history.replaceState(null, '', url.toString());
-}
-
-function resetTypedQueryBuffer() {
-    typedQueryBuffer = '';
-    updateAddressBarQuery('');
-}
-
-function scheduleTypedQueryReset() {
-    clearTimeout(typedQueryResetTimer);
-    typedQueryResetTimer = setTimeout(resetTypedQueryBuffer, 5000);
-}
-
-const SHORTCUT_COMMANDS = {
-    'c': 'https://chatgpt.com',
-    'a': 'https://claude.ai',
-    'g': 'https://gemini.google.com',
-    'p': 'https://www.perplexity.ai',
-    'y': 'https://youtube.com',
-    'm': 'https://maps.google.com',
-    'l': 'https://linkedin.com',
-    'i': 'https://instagram.com'
-};
-
-function submitTypedQuery() {
-    const finalQuery = typedQueryBuffer.trim().toLowerCase();
-    if (!finalQuery) return;
-
-    if (SHORTCUT_COMMANDS[finalQuery]) {
-        window.location.href = SHORTCUT_COMMANDS[finalQuery];
-    } else {
-        // Navigate to search results like omnibox behavior.
-        window.location.href = `https://www.google.com/search?q=${encodeURIComponent(typedQueryBuffer.trim())}`;
-    }
-}
-
-function setupTypeToSearch() {
-    document.addEventListener('keydown', (event) => {
-        if (event.defaultPrevented || isEditableTarget(event.target)) return;
-        
-        // Skip if any modifier except Shift is pressed (Shift is used for capital letters/symbols in search)
-        if (event.ctrlKey || event.metaKey || event.altKey) return;
-
-        if (event.key === 'Enter') {
-            if (typedQueryBuffer.trim()) {
-                event.preventDefault();
-                submitTypedQuery();
-            }
-            return;
-        }
-
-        if (event.key === 'Escape') {
-            if (typedQueryBuffer) {
-                event.preventDefault();
-                resetTypedQueryBuffer();
-            }
-            return;
-        }
-
-        if (event.key === 'Backspace') {
-            if (typedQueryBuffer) {
-                event.preventDefault();
-                typedQueryBuffer = typedQueryBuffer.slice(0, -1);
-                updateAddressBarQuery(typedQueryBuffer);
-                scheduleTypedQueryReset();
-            }
-            return;
-        }
-
-        if (event.key.length === 1) {
-            typedQueryBuffer += event.key;
-            updateAddressBarQuery(typedQueryBuffer);
-            scheduleTypedQueryReset();
-        }
-    });
-}
-
-function setupShortcuts() {
-    document.addEventListener('keydown', (event) => {
-        if (event.defaultPrevented || isEditableTarget(event.target)) return;
-
-        // Toggle help with Alt + / or ?
-        if ((event.altKey && event.key === '/') || (event.key === '?' && !typedQueryBuffer)) {
-            event.preventDefault();
-            const legend = document.getElementById('shortcuts-legend');
-            if (legend) {
-                legend.classList.toggle('visible');
-            }
-            return;
-        }
-    });
-}
-
 function fitTextToContainer(textElement, containerElement, isClock = false) {
     if (!textElement || !containerElement) return;
 
@@ -251,8 +142,6 @@ async function updateTemperatureC() {
 document.fonts.ready.then(() => {
     updateClock();
     updateTemperatureC();
-    setupTypeToSearch();
-    setupShortcuts();
 
     setInterval(updateClock, 1000);
     setInterval(updateTemperatureC, 10 * 60 * 1000);
