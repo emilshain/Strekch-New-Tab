@@ -26,6 +26,7 @@ let typedQueryResetTimer;
 
 function isEditableTarget(target) {
     if (!target) return false;
+    if (target.id === 'focus-sink') return false; 
     const tagName = target.tagName;
     return target.isContentEditable || tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT';
 }
@@ -62,24 +63,34 @@ const SHORTCUT_COMMANDS = {
 };
 
 function submitTypedQuery() {
-    const finalQuery = typedQueryBuffer.trim().toLowerCase();
-    if (!finalQuery) return;
+    const query = typedQueryBuffer.trim();
+    if (!query) return;
 
-    if (SHORTCUT_COMMANDS[finalQuery]) {
-        window.location.href = SHORTCUT_COMMANDS[finalQuery];
-    } else {
-        // Navigate to search results like omnibox behavior.
-        window.location.href = `https://www.google.com/search?q=${encodeURIComponent(typedQueryBuffer.trim())}`;
-    }
+    // Navigate to search results like omnibox behavior.
+    window.location.href = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
 }
 
 function setupTypeToSearch() {
+    const focusSink = document.getElementById('focus-sink');
+    
+    // Maintain focus on the page
+    const maintainFocus = () => {
+        if (!isEditableTarget(document.activeElement)) {
+            focusSink?.focus();
+        }
+    };
+
+    document.addEventListener('click', maintainFocus);
+    setTimeout(maintainFocus, 100);
+    maintainFocus();
+
     document.addEventListener('keydown', (event) => {
         if (event.defaultPrevented || isEditableTarget(event.target)) return;
         
-        // Skip if any modifier except Shift is pressed (Shift is used for capital letters/symbols in search)
+        // Skip if any modifier except Shift is pressed
         if (event.ctrlKey || event.metaKey || event.altKey) return;
 
+        // Redirect all typing to our buffer
         if (event.key === 'Enter') {
             if (typedQueryBuffer.trim()) {
                 event.preventDefault();
@@ -107,6 +118,7 @@ function setupTypeToSearch() {
         }
 
         if (event.key.length === 1) {
+            // We capture the key here even if not focused on an input because we have the focus-sink
             typedQueryBuffer += event.key;
             updateAddressBarQuery(typedQueryBuffer);
             scheduleTypedQueryReset();
@@ -117,6 +129,16 @@ function setupTypeToSearch() {
 function setupShortcuts() {
     document.addEventListener('keydown', (event) => {
         if (event.defaultPrevented || isEditableTarget(event.target)) return;
+
+        // Shortcut support: Alt + [key]
+        if (event.altKey && event.key.length === 1) {
+            const key = event.key.toLowerCase();
+            if (SHORTCUT_COMMANDS[key]) {
+                event.preventDefault();
+                window.location.href = SHORTCUT_COMMANDS[key];
+                return;
+            }
+        }
 
         // Toggle help with Alt + / or ?
         if ((event.altKey && event.key === '/') || (event.key === '?' && !typedQueryBuffer)) {
@@ -247,14 +269,17 @@ async function updateTemperatureC() {
     }
 }
 
-// Ensure fonts are loaded before first fit
-document.fonts.ready.then(() => {
-    updateClock();
-    updateTemperatureC();
-    setupTypeToSearch();
-    setupShortcuts();
+// Run setup immediately
+updateClock();
+updateTemperatureC();
+setupTypeToSearch();
+setupShortcuts();
 
-    setInterval(updateClock, 1000);
-    setInterval(updateTemperatureC, 10 * 60 * 1000);
-    window.addEventListener('resize', fitAllCards);
+setInterval(updateClock, 1000);
+setInterval(updateTemperatureC, 10 * 60 * 1000);
+window.addEventListener('resize', fitAllCards);
+
+// Optional: Refit cards once fonts definitely arrive
+document.fonts.ready.then(() => {
+    fitAllCards();
 });
