@@ -8,7 +8,10 @@ function updateClock() {
     const dateTextNew = document.getElementById('date-text-new');
     if (!clockText || !dayText || !dateTextNew) return;
 
-    clockText.textContent = `${hours}:${minutes}`;
+    const hoursElem = document.getElementById('hours-text');
+    const minutesElem = document.getElementById('minutes-text');
+    if (hoursElem) hoursElem.textContent = hours;
+    if (minutesElem) minutesElem.textContent = minutes;
     
     // Day: WEDNESDAY
     const dayOptions = { weekday: 'long' };

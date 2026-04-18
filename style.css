@@ -226,6 +226,15 @@ body {
     color: #ffffff;
 }
 
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+.dots {
+    animation: pulse 1s infinite ease-in-out;
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;
