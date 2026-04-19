@@ -27,22 +27,27 @@ function updateClock() {
 function fitTextToContainer(textElement, containerElement, isClock = false) {
     if (!textElement || !containerElement) return;
 
+    // Determine overshoot: Single-line layout allows 28% vertical bleed for edge-to-edge ink.
+    // Stacked layout needs to fit strictly within bounds to avoid top/bottom clipping.
+    const isStacked = textElement.parentElement && textElement.parentElement.classList.contains('stacked');
+    const overshoot = isStacked ? 1.03 : 1.28;
+    
     const baseWght = isClock ? 400 : 200;
     
     // Reset styles for measurement
     textElement.style.fontSize = '100px'; 
     textElement.style.fontVariationSettings = `'wdth' 100, 'wght' ${baseWght}`;
 
-    // Relying on CSS padding (8px) for margins, so we aim for 100% of inner dimensions
+    // Relying on CSS padding for margins, so we aim for 100% of inner dimensions
     const targetW = containerElement.clientWidth;
     const targetH = containerElement.clientHeight;
 
     let minWdth = 1;
     let maxWdth = 800; // Allow extreme stretching to touch the box edges
     
-    // 1. Initial Height Fit - 28% Overshoot
+    // 1. Initial Height Fit - with Overshoot
     let rect = textElement.getBoundingClientRect();
-    let fontSize = 100 * (targetH / (rect.height || 100)) * 1.28;
+    let fontSize = 100 * (targetH / (rect.height || 100)) * overshoot;
     textElement.style.fontSize = fontSize + 'px';
 
     // 2. Binary Search for ideal Width
@@ -65,15 +70,15 @@ function fitTextToContainer(textElement, containerElement, isClock = false) {
     textElement.style.fontVariationSettings = `'wdth' ${finalWdth}, 'wght' ${finalWght}`;
     
     rect = textElement.getBoundingClientRect();
-    if (rect.height > targetH * 1.28) {
-        fontSize *= ((targetH * 1.28) / rect.height);
+    if (rect.height > targetH * overshoot) {
+        fontSize *= ((targetH * overshoot) / rect.height);
         textElement.style.fontSize = fontSize + 'px';
     }
 
-    // 4. Absolute Safety Guard - Allow 28% vertical overflow for edge-to-edge ink
+    // 4. Absolute Safety Guard
     for (let j = 0; j < 5; j++) {
         rect = textElement.getBoundingClientRect();
-        const overflowV = rect.height > containerElement.clientHeight * 1.28;
+        const overflowV = rect.height > containerElement.clientHeight * overshoot;
         const overflowH = rect.width > containerElement.clientWidth;
         
         if (overflowV || overflowH) {
@@ -86,12 +91,34 @@ function fitTextToContainer(textElement, containerElement, isClock = false) {
 }
 
 function fitAllCards() {
-    // Clock always fits to fill its (flexible) card
-    fitTextToContainer(document.getElementById('clock-text'), document.getElementById('clock-section'), true);
+    const clockSection = document.getElementById('clock-section');
+    const clock = document.getElementById('clock');
     
-    // Fit Date Card sections
-    fitTextToContainer(document.getElementById('day-text'), document.getElementById('day-section'), false);
-    fitTextToContainer(document.getElementById('date-text-new'), document.getElementById('date-section'), false);
+    if (clockSection && clock) {
+        const container = document.querySelector('.container');
+        const windowRatio = window.innerWidth / window.innerHeight;
+        
+        // Full layout shift to vertical stack at 85:100 ratio
+        if (windowRatio < 0.85) {
+            container.classList.add('mobile-stacked');
+        } else {
+            container.classList.remove('mobile-stacked');
+        }
+
+        // Clock section stacking logic (950:630 threshold)
+        if (windowRatio < (95 / 63)) {
+            clock.classList.add('stacked');
+        } else {
+            clock.classList.remove('stacked');
+        }
+    }
+
+    // Clock always fits to fill its (flexible) card
+    fitTextToContainer(document.getElementById('clock-text'), clockSection, true);
+    
+    // Fit Date Card sections - Now with weight-flexing enabled to fill wide bars
+    fitTextToContainer(document.getElementById('day-text'), document.getElementById('day-section'), true);
+    fitTextToContainer(document.getElementById('date-text-new'), document.getElementById('date-section'), true);
     
     // Fit Temperature Card - Now with weight-flexing enabled
     fitTextToContainer(document.getElementById('temperature-text'), document.getElementById('temp-section'), true);
