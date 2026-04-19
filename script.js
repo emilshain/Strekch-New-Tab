@@ -50,8 +50,8 @@ function fitTextToContainer(textElement, containerElement, isClock = false) {
     let fontSize = 100 * (targetH / (rect.height || 100)) * overshoot;
     textElement.style.fontSize = fontSize + 'px';
 
-    // 2. Binary Search for ideal Width
-    for (let i = 0; i < 15; i++) {
+    // 2. Binary Search for ideal Width (Reduced iterations for performance)
+    for (let i = 0; i < 10; i++) {
         let testWdth = (minWdth + maxWdth) / 2;
         let testWght = isClock ? Math.max(10, Math.min(950, testWdth * 5.5)) : 200;
         textElement.style.fontVariationSettings = `'wdth' ${testWdth}, 'wght' ${testWght}`;
@@ -143,37 +143,60 @@ async function updateTemperatureC() {
     const temperatureText = document.getElementById('temperature-text');
     if (!temperatureText) return;
 
+    // 1. Instant retrieval from cache for immediate "fitted" display
+    const cachedTemp = localStorage.getItem('last_temp_c');
+    if (cachedTemp) {
+        temperatureText.textContent = `${cachedTemp}°C`;
+        fitAllCards();
+    } else {
+        temperatureText.textContent = '--°C';
+        fitAllCards();
+    }
+
     try {
-        temperatureText.textContent = 'Loading...';
         const position = await getCurrentPositionAsync();
         const { latitude, longitude } = position.coords;
 
         const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(latitude)}&longitude=${encodeURIComponent(longitude)}&current=temperature_2m&temperature_unit=celsius`;
         const response = await fetch(weatherUrl);
-        if (!response.ok) {
-            throw new Error('Weather request failed');
-        }
+        if (!response.ok) throw new Error('Weather request failed');
 
         const data = await response.json();
         const tempC = data?.current?.temperature_2m;
-        if (typeof tempC !== 'number') {
-            throw new Error('Missing weather data');
-        }
+        if (typeof tempC !== 'number') throw new Error('Missing weather data');
 
-        temperatureText.textContent = `${Math.round(tempC)}°C`;
+        const finalTemp = Math.round(tempC);
+        temperatureText.textContent = `${finalTemp}°C`;
+        localStorage.setItem('last_temp_c', finalTemp);
         fitAllCards();
     } catch {
-        temperatureText.textContent = 'Location Off';
-        fitAllCards();
+        // Only show "OFF" if we can't even get cached data
+        if (!localStorage.getItem('last_temp_c')) {
+            temperatureText.textContent = '--°C';
+            fitAllCards();
+        }
     }
 }
 
-// Ensure fonts are loaded before first fit
+// Ensure fonts are loaded and initial fitting is done before revealing
 document.fonts.ready.then(() => {
-    updateClock();
-    updateTemperatureC();
+    // Force a clean layout pass before fitting
+    requestAnimationFrame(() => {
+        updateClock();
+        
+        // Use a second rAF to ensure the fitted state is ready to be animated
+        requestAnimationFrame(() => {
+            const container = document.querySelector('.container');
+            if (container) container.classList.add('ready');
 
-    setInterval(updateClock, 1000);
-    setInterval(updateTemperatureC, 10 * 60 * 1000);
+            // Delay the "heavy" tasks until the 1.5s animation is safely finished
+            setTimeout(() => {
+                updateTemperatureC();
+                setInterval(updateClock, 1000);
+                setInterval(updateTemperatureC, 10 * 60 * 1000);
+            }, 1600);
+        });
+    });
+
     window.addEventListener('resize', fitAllCards);
 });
